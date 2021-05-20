@@ -38,6 +38,9 @@ admin_last_name = config.require('admin_last_name')
 controller_archive_path = config.require('controller_archive_path')
 # Disk space in gigabytes for the data partition on the Controller VM
 data_disk_size_gb = config.get_int('data_disk_size') or 130
+# Instance size of Controller VM
+vm_size = config.get('vm_size') or 'Standard_B8ms'
+
 # Email server settings
 smtp_host = config.require('smtp_host')
 smtp_port = config.require_int('smtp_port')
@@ -248,7 +251,7 @@ vm = compute.VirtualMachine(
     vm_name='vm-nc-{0}'.format(installation_id),
     location=location,
     hardware_profile=compute.HardwareProfileArgs(
-        vm_size='Standard_B8ms'),
+        vm_size=vm_size),
     os_profile=compute.OSProfileArgs(
         computer_name='nginx-controller',
         custom_data=custom_data,
