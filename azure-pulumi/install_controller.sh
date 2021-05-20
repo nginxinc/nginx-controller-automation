@@ -158,27 +158,16 @@ if ! command -v docker; then
   sudo systemctl start containerd
 fi
 
-
-if ! command -v kubelet; then
-  echo 'Installing Kubernetes'
+if [ ! -d /opt/var/lib/kubelet ]; then
+  echo 'Creating kubelet directory'
   # Link location in /opt to default kubelet data directory so that data is installed there by default
   sudo mkdir --parents /opt/var/lib/kubelet
   sudo chmod 0700 /opt/var/lib/kubelet
+fi
 
-  if [ ! -h /var/lib/kubelet ]; then
-    sudo ln --symbolic /opt/var/lib/kubelet /var/lib/kubelet
-  fi
-
-  "${EXTRACT_DIR}/helper.sh" prereqs k8s || >&2 echo 'k8s install script returned a non-zero exit code - ignoring';
-
-  # Update configuration to use larger data disk location for storing kubelet ephemeral data
-  if ! sudo stat --terse /etc/default/kubelet > /dev/null 2>&1; then
-    echo 'KUBELET_EXTRA_ARGS=--root-dir=/opt/var/lib/kubelet' | sudo tee /etc/default/kubelet > /dev/null
-  elif ! sudo grep --quiet '\-\-root-dir' /etc/default/kubelet; then
-    echo 'KUBELET_EXTRA_ARGS=--root-dir=/opt/var/lib/kubelet' | sudo tee --append /etc/default/kubelet > /dev/null
-  fi
-
-  sudo systemctl stop kubelet
+if [ ! -h /var/lib/kubelet ]; then
+  echo 'Creating kubelet symlink'
+  sudo ln --symbolic /opt/var/lib/kubelet /var/lib/kubelet
 fi
 
 # Test to see if we can connect to Azure's PostgreSQL service
