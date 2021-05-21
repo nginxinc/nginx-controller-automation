@@ -1,0 +1,7 @@
+---
+nginx_controller_environmentName: "production-us-east"
+nginx_controller_app:
+  metadata:
+    name: "trading.acmefinancial.net"
+    displayName: "Trading.ACMEFinancial.net"
+    description: "Core Trading Application"
