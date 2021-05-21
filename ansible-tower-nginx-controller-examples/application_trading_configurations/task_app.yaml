@@ -1,0 +1,18 @@
+---
+- hosts: localhost
+  gather_facts: false
+  collections:
+  - nginxinc.nginx_controller
+
+  tasks:
+  - name: read the app config
+    include_vars: 
+      file: "{{ playbook_dir }}/app_trading.yaml"
+
+  - name: Retrieve the NGINX Controller auth token
+    include_role:
+      name: nginxinc.nginx_controller_generate_token
+
+  - name: Configure the application
+    include_role:
+      name: nginxinc.nginx_controller_application

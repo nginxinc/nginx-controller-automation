@@ -1,0 +1,54 @@
+# ansible-playbook nginx_controller_component.yaml -e "nginx_controller_user_email=brian@example.com nginx_controller_user_password=notsecure nginx_controller_fqdn=controller.example.local" 
+# ansible-playbook nginx_controller_component.yaml -e "@nginx_controller_component_vars.yaml"
+
+- hosts: localhost
+  gather_facts: no
+  collections:
+  - nginxinc.nginx_controller
+
+  tasks:
+  - include_role:
+      name: nginx_controller_generate_token
+
+  - name: configure the component
+    include_role:
+      name: nginx_controller_component
+    vars:
+      nginx_controller_appName: "lending.acmefinancial.net"
+      nginx_controller_environmentName: "production-us-west"
+      nginx_controller_component:
+        metadata: 
+          name: core-lending
+          displayName: "Shared Public Lending BU Gateway"
+          description: "Routes all non special Lending applications"
+        desiredState:  
+          ingress:
+            uris:
+              "/":
+                {} # use defaults
+              "/jokes/random":
+                matchMethod: PREFIX
+            gatewayRefs:
+              - ref: "/services/environments/production-us-west/gateways/lending"
+          backend:
+            workloadGroups:
+              group1:
+                uris:
+                  "http://10.1.10.11:8121":
+                    isDown: true
+                  "http://10.1.10.12:8121":
+                    {} # use defaults
+                  "http://10.1.10.11:5821":
+                    {} # use defaults
+                  "http://10.1.10.12:5821":
+                    failTimeout: 10s
+                loadBalancingMethod: 
+                  type: ROUND_ROBIN
+            monitoring:
+              response:
+                status:
+                  range:
+                    startCode: 200
+                    endCode: 201
+                  match: true
+
